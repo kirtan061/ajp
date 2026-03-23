@@ -1,0 +1,119 @@
+Practical_5/
+├── Web Pages/
+│   ├── META-INF/
+│   ├── WEB-INF/
+│   └── index.html
+├── Source Packages/
+│   └── <default package>/
+│       ├── StudentServlet.java
+│       └── MarksServlet.java
+├── Libraries/
+│   ├── JDK (Default)
+│   └── Apache Tomcat Server
+
+
+index.html
+
+<!DOCTYPE html>import java.io.*;
+import javax.servlet.*;
+import javax.servlet.http.*;
+import javax.servlet.annotation.WebServlet;
+
+@WebServlet("/StudentServlet")
+public class StudentServlet extends HttpServlet {
+
+    protected void doPost(HttpServletRequest request, HttpServletResponse response)
+            throws ServletException, IOException {
+
+        response.setContentType("text/html");
+        PrintWriter out = response.getWriter();
+
+        String name = request.getParameter("name");
+        String id = request.getParameter("id");
+        String dept = request.getParameter("dept");
+
+        HttpSession session = request.getSession();
+        session.setAttribute("name", name);
+        session.setAttribute("id", id);
+        session.setAttribute("dept", dept);
+
+        out.println("<h3>Welcome, " + name + "</h3>");
+
+        out.println("<form action='MarksServlet' method='post'>");
+        out.println("Subject 1: <input type='number' name='m1'><br><br>");
+        out.println("Subject 2: <input type='number' name='m2'><br><br>");
+        out.println("Subject 3: <input type='number' name='m3'><br><br>");
+        out.println("Subject 4: <input type='number' name='m4'><br><br>");
+        out.println("Subject 5: <input type='number' name='m5'><br><br>");
+        out.println("Subject 6: <input type='number' name='m6'><br><br>");
+        out.println("<input type='submit' value='Generate Result'>");
+        out.println("</form>");
+    }
+}
+
+MarksServlet.java
+
+import java.io.*;
+import javax.servlet.*;
+import javax.servlet.http.*;
+import javax.servlet.annotation.WebServlet;
+
+@WebServlet("/MarksServlet")
+public class MarksServlet extends HttpServlet {
+
+    protected void doPost(HttpServletRequest request, HttpServletResponse response)
+            throws ServletException, IOException {
+
+        response.setContentType("text/html");
+        PrintWriter out = response.getWriter();
+
+        HttpSession session = request.getSession();
+        String name = (String) session.getAttribute("name");
+        String id = (String) session.getAttribute("id");
+        String dept = (String) session.getAttribute("dept");
+
+        int m1 = Integer.parseInt(request.getParameter("m1"));
+        int m2 = Integer.parseInt(request.getParameter("m2"));
+        int m3 = Integer.parseInt(request.getParameter("m3"));
+        int m4 = Integer.parseInt(request.getParameter("m4"));
+        int m5 = Integer.parseInt(request.getParameter("m5"));
+        int m6 = Integer.parseInt(request.getParameter("m6"));
+
+        boolean pass = m1>=35 && m2>=35 && m3>=35 && m4>=35 && m5>=35 && m6>=35;
+
+        out.println("<h2>Result</h2>");
+        out.println("<h3>Student Name: " + name + "</h3>");
+        out.println("ID: " + id + "<br>");
+        out.println("Department: " + dept + "<br><br>");
+
+        if (pass) {
+            out.println("<h2 style='color:green'>PASS</h2>");
+        } else {
+            out.println("<h2 style='color:red'>FAIL</h2>");
+        }
+
+        session.invalidate();
+    }
+}
+
+
+<html>
+<head>
+<title>Student Details</title>
+</head>
+<body>
+
+<h2>Student Information</h2>
+
+<form action="StudentServlet" method="post">
+    Name: <input type="text" name="name"><br><br>
+    ID: <input type="text" name="id"><br><br>
+    Department: <input type="text" name="dept"><br><br>
+    <input type="submit" value="Next">
+</form>
+
+</body>
+</html>
+
+StudentServlet.java
+
