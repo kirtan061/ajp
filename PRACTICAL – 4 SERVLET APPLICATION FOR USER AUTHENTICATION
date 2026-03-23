@@ -1,0 +1,119 @@
+Practical_4/
+├── Web Pages/
+│   ├── META-INF/
+│   ├── WEB-INF/
+│   └── index.html
+├── Source Packages/
+│   └── <default package>/
+│       └── LoginServlet.java
+├── Libraries/
+│   ├── mysql-connector-j-9.5.0.jar
+│   └── Apache Tomcat Server
+
+
+CREATE DATABASE practical_4;
+USE practical_4;
+
+CREATE TABLE user (
+    id INT PRIMARY KEY AUTO_INCREMENT,
+    username VARCHAR(50),
+    password VARCHAR(50)
+);
+
+-- Insert sample data
+INSERT INTO user (username, password) VALUES ('admin', '1234');
+
+
+index.html
+
+<!DOCTYPE html>
+<html>
+<head>
+<title>User Login</title>
+</head>
+<body>
+
+<h2>User Authentication - Practical 4</h2>
+
+<form action="LoginServlet" method="post">
+    Username: <input type="text" name="username"><br><br>
+    Password: <input type="password" name="password"><br><br>
+    <input type="submit" value="Login">
+</form>
+
+</body>
+</html>
+
+LoginServlet.java
+
+import java.io.*;
+import java.sql.*;
+import java.util.Enumeration;
+import javax.servlet.*;
+import javax.servlet.http.*;
+import javax.servlet.annotation.WebServlet;
+
+@WebServlet("/LoginServlet")
+public class LoginServlet extends HttpServlet {
+
+    protected void doPost(HttpServletRequest request, HttpServletResponse response)
+            throws ServletException, IOException {
+
+        response.setContentType("text/html");
+        PrintWriter out = response.getWriter();
+
+        String username = request.getParameter("username");
+        String password = request.getParameter("password");
+
+        try {
+
+            Class.forName("com.mysql.cj.jdbc.Driver");
+
+            Connection con = DriverManager.getConnection(
+                    "jdbc:mysql://localhost:3306/practical_4",
+                    "root",
+                    ""
+            );
+
+            PreparedStatement ps = con.prepareStatement(
+                    "SELECT * FROM user WHERE username=? AND password=?"
+            );
+
+            ps.setString(1, username);
+            ps.setString(2, password);
+
+            ResultSet rs = ps.executeQuery();
+
+            if (rs.next()) {
+                out.println("<h2>Login Successful</h2>");
+            } else {
+                out.println("<h2>Invalid Username or Password</h2>");
+            }
+
+            // Request Headers
+            out.println("<h3>Request Header Values</h3>");
+            Enumeration<String> reqHeaders = request.getHeaderNames();
+
+            while (reqHeaders.hasMoreElements()) {
+                String h = reqHeaders.nextElement();
+                out.println(h + " : " + request.getHeader(h) + "<br>");
+            }
+
+            // Response Headers
+            out.println("<h3>Response Header Values</h3>");
+            response.setHeader("Application", "Practical_4");
+
+            for (String h : response.getHeaderNames()) {
+                out.println(h + " : " + response.getHeader(h) + "<br>");
+            }
+
+            rs.close();
+            ps.close();
+            con.close();
+
+        } catch (Exception e) {
+            out.println(e);
+        }
+    }
+}
+
