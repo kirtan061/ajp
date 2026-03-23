@@ -1,0 +1,95 @@
+Pract_7/
+├── Web Pages/
+│   ├── META-INF/
+│   ├── WEB-INF/
+│   ├── login.jsp
+│   ├── authenticate.jsp
+│   └── index.html
+├── Libraries/
+│   ├── mysql-connector-j-9.6.0.jar
+│   └── Apache Tomcat Server
+
+CREATE DATABASE jsp_db;
+USE jsp_db;
+
+CREATE TABLE users (
+    id INT PRIMARY KEY AUTO_INCREMENT,
+    username VARCHAR(50),
+    password VARCHAR(50)
+);
+
+-- Insert sample data
+INSERT INTO users (username, password) VALUES ('admin', '1234');
+
+login.jsp
+
+<%@ page language="java" %>
+<html>
+<head>
+    <title>User Login</title>
+</head>
+<body>
+
+<h2>User Authentication - JSP</h2>
+
+<form action="authenticate.jsp" method="post">
+    Username: <input type="text" name="username"><br><br>
+    Password: <input type="password" name="password"><br><br>
+    <input type="submit" value="Login">
+</form>
+
+</body>
+</html>
+
+authenticate.jsp
+
+<%@ page import="java.sql.*" %>
+
+<%
+String user = request.getParameter("username");
+String pass = request.getParameter("password");
+
+boolean valid = false;
+
+try {
+    Class.forName("com.mysql.cj.jdbc.Driver");
+
+    Connection con = DriverManager.getConnection(
+        "jdbc:mysql://localhost:3306/jsp_db",
+        "root",
+        ""
+    );
+
+    PreparedStatement ps = con.prepareStatement(
+        "SELECT * FROM users WHERE username=? AND password=?"
+    );
+
+    ps.setString(1, user);
+    ps.setString(2, pass);
+
+    ResultSet rs = ps.executeQuery();
+
+    if (rs.next()) {
+        valid = true;
+    }
+
+    rs.close();
+    ps.close();
+    con.close();
+
+} catch (Exception e) {
+    out.println("Error: " + e.getMessage());
+}
+
+if (valid) {
+%>
+    <h2 style="color: green">Login Successful!</h2>
+    <h3>Welcome, <%= user %></h3>
+<%
+} else {
+%>
+    <h2 style="color: red">Invalid Username or Password</h2>
+<%
+}
+%>
+
