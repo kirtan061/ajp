@@ -1,0 +1,71 @@
+Pract_6/
+├── Web Pages/
+│   ├── META-INF/
+│   ├── WEB-INF/
+│   └── index.html
+├── Source Packages/
+│   └── pract_6/
+│       └── RedirectServlet.java
+├── Libraries/
+│   └── Apache Tomcat Server
+
+index.html
+
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Redirect Servlet</title>
+</head>
+<body>
+
+<h2>Servlet Redirect Example</h2>
+
+<form action="RedirectServlet" method="post">
+    <input type="text" name="location" placeholder="Enter URL">
+    <button type="submit">Go</button>
+</form>
+
+</body>
+</html>
+
+RedirectServlet.java
+
+package pract_6;
+
+import java.io.IOException;
+import java.io.PrintWriter;
+import javax.servlet.ServletException;
+import javax.servlet.annotation.WebServlet;
+import javax.servlet.http.*;
+
+@WebServlet("/RedirectServlet")
+public class RedirectServlet extends HttpServlet {
+
+    @Override
+    protected void doPost(HttpServletRequest request, HttpServletResponse response)
+            throws ServletException, IOException {
+
+        response.setContentType("text/html");
+        PrintWriter out = response.getWriter();
+
+        String url = request.getParameter("location");
+
+        if (url == null || url.trim().isEmpty()) {
+            out.println("<h3>URL cannot be empty!</h3>");
+            return;
+        }
+
+        url = url.trim();
+
+        // Add https if missing
+        if (!url.startsWith("http://") && !url.startsWith("https://")) {
+            url = "https://" + url;
+        }
+
+        try {
+            response.sendRedirect(url);
+        } catch (IOException e) {
+            out.println("<h3>Invalid URL!</h3>");
+        }
+    }
+}
